@@ -2,11 +2,11 @@ import "./Footer.css";
 
 const quickLinks = [
   { label: "About Us",        href: "#about-us" },
-  { label: "Admissions",      href: "#courses" },
+  // { label: "Admissions",      href: "#courses" },
   { label: "Course Programs", href: "#courses" },
   { label: "Contact Us",      href: "#contact" },
-  { label: "Student Login",   href: "/LoginPage" },
-  { label: "Register",        href: "/Registration" },
+  { label: "Login",   href: "/LoginPage" },
+  { label: "Enquiry",        href: "/Registration" },
 ];
 
 const programs = [

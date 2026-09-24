@@ -1,26 +1,50 @@
+.backdrop,
+.backdrop *,
+.backdrop *::before,
+.backdrop *::after {
+  box-sizing: border-box;
+}
+
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 27, 76, 0.45);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 1000;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(15, 27, 76, 0.45);
+  animation: backdropIn 0.15s ease-out;
 }
 
 .modal {
+  /* Local tokens: use the global ones when defined, fall back otherwise */
+  --m-ink: var(--ink, #1a2740);
+  --m-ink-soft: var(--ink-soft, #6b7a94);
+  --m-border: var(--border, #e0e8f0);
+  --m-surface: var(--surface, #f4f6fa);
+  --m-blue: var(--blue, #2764c6);
+  --m-green: var(--green, #117b6d);
+  --m-danger: #d64545;
+
+  position: relative;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
+  max-height: 90dvh; /* accounts for mobile browser bars / keyboard */
   overflow-y: auto;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: var(--shadow-card-hover);
+  overscroll-behavior: contain;
   padding: 28px;
-  color: var(--ink);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: var(--shadow-card-hover, 0 18px 48px rgba(15, 27, 76, 0.25));
+  color: var(--m-ink);
+  animation: modalIn 0.18s ease-out;
 }
 
+/* ── Header ── */
 .header {
   display: flex;
   align-items: flex-start;
@@ -34,26 +58,37 @@
   font-size: 19px;
   font-weight: 700;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .closeBtn {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: var(--surface);
-  color: var(--ink-soft);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--m-surface);
+  color: var(--m-ink-soft);
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .closeBtn:hover {
-  background: var(--border);
+  background: var(--m-border);
 }
 
+.closeBtn:focus-visible,
+.secondaryBtn:focus-visible,
+.primaryBtn:focus-visible {
+  outline: 2px solid var(--m-blue);
+  outline-offset: 2px;
+}
+
+/* ── Form ── */
 .form {
   display: flex;
   flex-direction: column;
@@ -62,7 +97,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -70,40 +105,65 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0; /* stops date/select inputs from blowing out grid columns */
 }
 
 .label {
+  color: var(--m-ink-soft);
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--ink-soft);
 }
 
 .input,
 .inputReadOnly {
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  display: block;
+  width: 100%;
+  min-width: 0;
   padding: 11px 12px;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--ink);
+  border: 1px solid var(--m-border);
+  border-radius: 10px;
   background: #ffffff;
+  color: var(--m-ink);
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--m-blue);
+  box-shadow: 0 0 0 3px rgba(39, 100, 198, 0.18);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--m-danger);
+}
+
+/* iOS renders empty date/time inputs with zero height without this */
+.input[type="date"],
+.input[type="time"],
+.input[type="datetime-local"] {
+  min-height: 44px;
+  text-align: left;
+}
+
+textarea.input {
+  min-height: 88px;
+  resize: vertical;
 }
 
 .inputReadOnly {
-  background: var(--surface);
-  color: var(--ink-soft);
+  background: var(--m-surface);
+  color: var(--m-ink-soft);
 }
 
 .error {
+  color: var(--m-danger);
   font-size: 12px;
-  color: #d64545;
+  line-height: 1.4;
 }
 
+/* ── Dropzone ── */
 .dropzone {
   position: relative;
   display: flex;
@@ -111,30 +171,40 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1.5px dashed var(--border);
-  border-radius: 10px;
+  min-height: 96px;
   padding: 26px 16px;
-  color: var(--ink-soft);
+  border: 1.5px dashed var(--m-border);
+  border-radius: 10px;
+  background: var(--m-surface);
+  color: var(--m-ink-soft);
   font-size: 13.5px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere; /* long file names */
   cursor: pointer;
-  background: var(--surface);
+  transition: border-color 0.15s ease;
 }
 
-.dropzone:hover {
-  border-color: var(--blue);
+.dropzone:hover,
+.dropzone:focus-within {
+  border-color: var(--m-blue);
 }
 
 .uploadIcon {
-  color: var(--ink-soft);
+  flex-shrink: 0;
+  color: var(--m-ink-soft);
 }
 
 .hiddenFileInput {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   cursor: pointer;
 }
 
+/* ── Footer / buttons ── */
 .footer {
   display: flex;
   gap: 12px;
@@ -144,26 +214,29 @@
 .secondaryBtn,
 .primaryBtn {
   flex: 1;
-  border-radius: 10px;
+  min-height: 46px;
   padding: 13px 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: inherit;
   font-size: 14.5px;
   font-weight: 700;
   cursor: pointer;
-  border: 1px solid transparent;
+  transition: background-color 0.15s ease, filter 0.15s ease;
 }
 
 .secondaryBtn {
+  border-color: var(--m-border);
   background: #ffffff;
-  border-color: var(--border);
-  color: var(--ink);
+  color: var(--m-ink);
 }
 
 .secondaryBtn:hover {
-  background: var(--surface);
+  background: var(--m-surface);
 }
 
 .primaryBtn {
-  background: var(--blue);
+  background: var(--m-blue);
   color: #fff;
 }
 
@@ -176,58 +249,106 @@
   cursor: not-allowed;
 }
 
+.primaryBtn:disabled:hover {
+  filter: none;
+}
+
+/* ── Success state ── */
 .successState {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
   gap: 10px;
   padding: 20px 8px 4px;
+  text-align: center;
 }
 
 .checkCircle {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--green);
-  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 64px;
+  height: 64px;
   margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--m-green);
+  color: #fff;
 }
 
 .successTitle {
   margin: 0;
+  color: var(--m-green);
   font-size: 19px;
   font-weight: 700;
-  color: var(--green);
 }
 
 .successSubtitle {
   margin: 0 0 12px;
+  color: var(--m-ink-soft);
   font-size: 14px;
-  color: var(--ink-soft);
+  line-height: 1.5;
 }
 
 .successState .primaryBtn {
+  flex: none;
   width: 100%;
 }
 
-@media (max-width: 420px) {
+/* ── Animations ── */
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ── Mobile: the modal becomes a bottom sheet ── */
+@media (max-width: 600px) {
   .backdrop {
-    padding: 10px;
+    align-items: flex-end;
+    padding: 0;
   }
 
   .modal {
     max-width: 100%;
-    padding: 16px 12px 14px;
-    border-radius: 12px;
+    max-height: 92vh;
+    max-height: 92dvh;
+    padding: 0 16px;
+    border-radius: 18px 18px 0 0;
+    animation: sheetIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
+  /* Title + close stay visible while the form scrolls */
   .header {
-    margin-bottom: 14px;
-    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 0 -16px 16px;
+    padding: 16px;
+    border-bottom: 1px solid var(--m-border);
+    background: #ffffff;
   }
 
   .title {
@@ -235,45 +356,65 @@
     line-height: 1.25;
   }
 
-  .row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+  .closeBtn {
+    width: 40px; /* comfortable touch target */
+    height: 40px;
+    margin: -4px -4px -4px 0;
   }
 
-  .field {
-    gap: 4px;
+  .form {
+    gap: 14px;
+  }
+
+  /* Fields stack instead of squeezing two per row */
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
   }
 
   .label {
-    font-size: 10.5px;
-    letter-spacing: 0.02em;
-  }
-
-  .input,
-  .inputReadOnly {
-    padding: 10px 10px;
     font-size: 13px;
   }
 
-  .dropzone {
-    padding: 16px 10px;
+  /* 16px stops iOS Safari from zooming the page when a field is focused */
+  .input,
+  .inputReadOnly {
+    min-height: 46px;
+    padding: 11px 12px;
+    font-size: 16px;
+  }
+
+  .error {
     font-size: 12.5px;
   }
 
+  .dropzone {
+    min-height: 88px;
+    padding: 20px 14px;
+    font-size: 13px;
+  }
+
+  /* Buttons stay reachable: pinned to the bottom of the sheet */
   .footer {
-    gap: 8px;
-    margin-top: 4px;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    gap: 10px;
+    margin: 6px -16px 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--m-border);
+    background: #ffffff;
   }
 
   .secondaryBtn,
   .primaryBtn {
-    width: 100%;
-    padding: 11px 12px;
-    font-size: 13px;
+    min-height: 48px;
+    padding: 12px;
+    font-size: 15px;
   }
 
   .successState {
-    padding-top: 12px;
+    padding: 28px 8px calc(20px + env(safe-area-inset-bottom, 0px));
   }
 
   .successTitle {
@@ -281,7 +422,44 @@
   }
 
   .successSubtitle {
-    font-size: 13px;
     margin-bottom: 8px;
+    font-size: 13.5px;
+  }
+}
+
+/* Very narrow phones: stack the buttons, primary action on top */
+@media (max-width: 340px) {
+  .footer {
+    flex-direction: column-reverse;
+  }
+
+  .secondaryBtn,
+  .primaryBtn {
+    flex: none;
+    width: 100%;
+  }
+}
+
+/* Short landscape phones: keep the sheet usable above the keyboard */
+@media (max-height: 480px) and (orientation: landscape) {
+  .modal {
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .modal {
+    animation: none;
+  }
+
+  .closeBtn,
+  .input,
+  .inputReadOnly,
+  .dropzone,
+  .secondaryBtn,
+  .primaryBtn {
+    transition: none;
   }
 }
