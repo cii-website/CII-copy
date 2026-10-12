@@ -29,6 +29,42 @@ export async function fetchAssessments({
   });
 }
 
+export async function fetchAssessmentAttempts({
+  assessmentId,
+  page = 1,
+  limit = 10,
+  search,
+}) {
+  const response = await api.get(
+    `/instructor/assessments/${assessmentId}/attempts`,
+    {
+      params: {
+        page,
+        limit,
+        ...(search?.trim() ? { search: search.trim() } : {}),
+      },
+    },
+  );
+  return response.data.data;
+}
+
+export async function gradeAssessmentAttempt({
+  assessmentId,
+  caRecordId,
+  candidateMarks,
+  assessmentGrade,
+}) {
+  const body = {};
+  if (candidateMarks !== undefined) body.candidate_marks = candidateMarks;
+  if (assessmentGrade !== undefined) body.assessment_grade = assessmentGrade;
+
+  const response = await api.patch(
+    `/instructor/assessments/${assessmentId}/attempts/${caRecordId}/grade`,
+    body,
+  );
+  return response.data.data;
+}
+
 export async function createAssessment({
   batchId,
   title,
