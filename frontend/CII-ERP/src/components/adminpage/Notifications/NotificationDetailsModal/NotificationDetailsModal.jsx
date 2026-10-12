@@ -7,7 +7,13 @@ import {
 } from "../../../../../api/admin/notificationService";
 import "./NotificationDetailsModal.css";
 
-const NotificationDetailsModal = ({ notification, isOpen, onClose }) => {
+const NotificationDetailsModal = ({
+  notification,
+  isOpen,
+  onClose,
+  onDelete,
+  deleteMessage,
+}) => {
   if (!notification) return null;
 
   const Icon = notification.icon;
@@ -39,6 +45,27 @@ const NotificationDetailsModal = ({ notification, isOpen, onClose }) => {
         <p className="notification-details-modal__description">
           {notification.description}
         </p>
+        <div className="notification-details-modal__actions">
+          <button
+            type="button"
+            className="notification-details-modal__delete-btn"
+            onClick={() => onDelete?.(notification.id)}
+          >
+            Delete
+          </button>
+          <button
+            type="button"
+            className="notification-details-modal__close-btn"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+        {deleteMessage && (
+          <p className="notification-details-modal__delete-message">
+            {deleteMessage}
+          </p>
+        )}
         <span className="notification-details-modal__time">
           {notification.time}
         </span>

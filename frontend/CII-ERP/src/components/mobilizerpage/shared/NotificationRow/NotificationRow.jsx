@@ -18,30 +18,45 @@ const TYPE_MAP = {
  *      bell dropdown. Full size (default) is for the Notifications page.
  *  - onClick: (notification) => void
  */
-export default function NotificationRow({ notification, compact = false, onClick }) {
+export default function NotificationRow({ notification, compact = false, onClick, onDelete }) {
   const meta = TYPE_MAP[notification.type] || TYPE_MAP.system;
   const Icon = meta.icon;
 
   return (
-    <button
-      type="button"
-      className={`nr-row ${compact ? 'nr-row--compact' : ''} ${!notification.read ? 'nr-row--unread' : ''}`}
-      onClick={() => onClick?.(notification)}
-    >
-      <span className={`nr-row__icon nr-row__icon--${meta.tone}`}>
-        <Icon size={compact ? 15 : 17} />
-      </span>
+    <div className="nr-row-wrap">
+      <button
+        type="button"
+        className={`nr-row ${compact ? 'nr-row--compact' : ''} ${!notification.read ? 'nr-row--unread' : ''}`}
+        onClick={() => onClick?.(notification)}
+      >
+        <span className={`nr-row__icon nr-row__icon--${meta.tone}`}>
+          <Icon size={compact ? 15 : 17} />
+        </span>
 
-      <span className="nr-row__body">
-        <span className="nr-row__top">
-          <span className="nr-row__title">{notification.title}</span>
-          {!notification.read && <span className="nr-row__dot" />}
+        <span className="nr-row__body">
+          <span className="nr-row__top">
+            <span className="nr-row__title">{notification.title}</span>
+            {!notification.read && <span className="nr-row__dot" />}
+          </span>
+          <span className={`nr-row__message ${compact ? 'nr-row__message--clamp' : ''}`}>
+            {notification.message}
+          </span>
+          <span className="nr-row__timestamp">{notification.timestamp}</span>
         </span>
-        <span className={`nr-row__message ${compact ? 'nr-row__message--clamp' : ''}`}>
-          {notification.message}
-        </span>
-        <span className="nr-row__timestamp">{notification.timestamp}</span>
-      </span>
-    </button>
+      </button>
+
+      {onDelete && (
+        <button
+          type="button"
+          className="nr-row__delete"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete(notification);
+          }}
+        >
+          Delete
+        </button>
+      )}
+    </div>
   );
 }

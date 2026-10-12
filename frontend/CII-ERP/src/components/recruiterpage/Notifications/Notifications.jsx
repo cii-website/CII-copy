@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import NotificationDetailsModal from "./NotificationDetailsModal/NotificationDetailsModal";
 import Pagination from "../shared/Pagination/Pagination";
 import {
+  deleteNotification,
   notificationTypeStyles,
   fetchRecruiterNotifications,
 } from "../../../../api/recruiter/notificationService";
@@ -26,6 +27,8 @@ const Notifications = () => {
   const [pagination, setPagination] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteMessage, setDeleteMessage] = useState("");
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -73,6 +76,41 @@ const Notifications = () => {
     );
   };
 
+  const handleDeleteNotification = async (id) => {
+    const notification = notificationsList.find((item) => item.id === id);
+    if (!notification) return;
+
+    const isEventNotification =
+      String(notification.type ?? "").toLowerCase().includes("event") ||
+      String(notification.category ?? "").toLowerCase().includes("event") ||
+      String(notification.title ?? "").toLowerCase().includes("event");
+
+    if (isEventNotification) {
+      setDeleteSuccessMessage("");
+      setDeleteMessage("Event notifications cannot be deleted.");
+      setSelectedId(id);
+      return;
+    }
+
+    try {
+      setDeleteMessage("");
+      setDeleteSuccessMessage("");
+      const result = await deleteNotification(id);
+      setNotificationsList((prev) => prev.filter((item) => item.id !== id));
+      setDeleteSuccessMessage(
+        result?.message ?? "Notification deleted successfully",
+      );
+      if (selectedId === id) {
+        setSelectedId(null);
+      }
+    } catch (loadError) {
+      setDeleteMessage(
+        loadError?.response?.data?.message ?? "Couldn't delete this notification.",
+      );
+      setSelectedId(id);
+    }
+  };
+
   return (
     <div className="notifications-page">
       <header className="notifications-page__header">
@@ -91,6 +129,12 @@ const Notifications = () => {
           Mark all as read
         </button>
       </header>
+
+      {deleteSuccessMessage && (
+        <p className="notifications-page__delete-success" role="status">
+          {deleteSuccessMessage}
+        </p>
+      )}
 
       <div className="notifications-page__tabs">
         {TABS.map((tab) => (
@@ -113,36 +157,48 @@ const Notifications = () => {
             const style = notificationTypeStyles[item.type] ?? {};
 
             return (
-              <button
-                key={item.id}
-                type="button"
-                className="notifications-page__card"
-                onClick={() => handleOpenNotification(item.id)}
-              >
-                <span
-                  className="notifications-page__icon"
-                  style={{ backgroundColor: style.bg }}
+              <div key={item.id} className="notifications-page__card-row">
+                <button
+                  type="button"
+                  className="notifications-page__card"
+                  onClick={() => handleOpenNotification(item.id)}
                 >
-                  <Icon size={18} color={style.color} strokeWidth={2} />
-                </span>
-
-                <div className="notifications-page__content">
-                  <span className="notifications-page__card-title">
-                    {item.title}
-                  </span>
-                  <p className="notifications-page__description">
-                    {item.description}
-                  </p>
-                  <span className="notifications-page__time">{item.time}</span>
-                </div>
-
-                {item.unread && (
                   <span
-                    className="notifications-page__unread-dot"
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
+                    className="notifications-page__icon"
+                    style={{ backgroundColor: style.bg }}
+                  >
+                    <Icon size={18} color={style.color} strokeWidth={2} />
+                  </span>
+
+                  <div className="notifications-page__content">
+                    <span className="notifications-page__card-title">
+                      {item.title}
+                    </span>
+                    <p className="notifications-page__description">
+                      {item.description}
+                    </p>
+                    <span className="notifications-page__time">{item.time}</span>
+                  </div>
+
+                  {item.unread && (
+                    <span
+                      className="notifications-page__unread-dot"
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  className="notifications-page__delete-btn"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteNotification(item.id);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             );
           })}
 
@@ -169,7 +225,12 @@ const Notifications = () => {
       <NotificationDetailsModal
         notification={selectedNotification}
         isOpen={Boolean(selectedNotification)}
-        onClose={() => setSelectedId(null)}
+        onClose={() => {
+          setSelectedId(null);
+          setDeleteMessage("");
+        }}
+        onDelete={handleDeleteNotification}
+        deleteMessage={deleteMessage}
       />
     </div>
   );

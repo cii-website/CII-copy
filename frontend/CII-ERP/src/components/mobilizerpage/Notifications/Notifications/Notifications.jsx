@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { fetchMobilizerNotifications } from "../../../../../api/mobilizer/notificationService";
+import {
+  deleteNotification,
+  fetchMobilizerNotifications,
+} from "../../../../../api/mobilizer/notificationService";
 import NotificationRow from "../../shared/NotificationRow/NotificationRow";
 import NotificationDetailModal from "../../shared/NotificationDetailModal/NotificationDetailModal";
 import "./Notifications.css";
@@ -13,6 +16,8 @@ export default function Notifications() {
   const [page, setPage] = useState(1);
   const [activeNotification, setActiveNotification] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState("");
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -69,6 +74,45 @@ export default function Notifications() {
     setUnreadCount(0);
   };
 
+  const handleDeleteNotification = async (notification) => {
+    if (!notification) return;
+
+    const notificationId =
+      notification.id ?? notification.user_notification_id ?? notification.notification_id;
+    if (!notificationId) return;
+
+    const isEventNotification =
+      String(notification.type ?? "").toUpperCase().includes("EVENT") ||
+      String(notification.notification_type ?? "").toUpperCase().includes("EVENT") ||
+      String(notification.reference_type ?? "").toUpperCase().includes("EVENT");
+
+    if (isEventNotification) {
+      setDeleteSuccessMessage("");
+      setDeleteMessage("Event notifications cannot be deleted.");
+      setActiveNotification(notification);
+      return;
+    }
+
+    try {
+      setDeleteMessage("");
+      setDeleteSuccessMessage("");
+      const result = await deleteNotification(notificationId);
+      setNotifications((prev) =>
+        prev.filter((item) => (item.id ?? item.user_notification_id ?? item.notification_id) !== notificationId),
+      );
+      setUnreadCount((count) => Math.max(0, count - (notification.read ? 0 : 1)));
+      setDeleteSuccessMessage(
+        result?.message ?? "Notification deleted successfully",
+      );
+      setActiveNotification(null);
+    } catch (error) {
+      setDeleteMessage(
+        error?.response?.data?.message ?? "Couldn't delete this notification.",
+      );
+      setActiveNotification(notification);
+    }
+  };
+
   return (
     <div className="notifications-page">
       <div className="nt-header">
@@ -89,6 +133,12 @@ export default function Notifications() {
           </button>
         )}
       </div>
+
+      {deleteSuccessMessage && (
+        <p className="nt-delete-success" role="status">
+          {deleteSuccessMessage}
+        </p>
+      )}
 
       <div className="nt-tabs">
         {["All", "Unread"].map((tab) => (
@@ -118,6 +168,7 @@ export default function Notifications() {
               key={notification.id}
               notification={notification}
               onClick={handleRowClick}
+              onDelete={handleDeleteNotification}
             />
           ))
         )}
@@ -151,7 +202,12 @@ export default function Notifications() {
 
       <NotificationDetailModal
         notification={activeNotification}
-        onClose={() => setActiveNotification(null)}
+        onClose={() => {
+          setActiveNotification(null);
+          setDeleteMessage("");
+        }}
+        onDelete={handleDeleteNotification}
+        deleteMessage={deleteMessage}
       />
     </div>
   );

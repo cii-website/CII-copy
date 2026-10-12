@@ -20,11 +20,10 @@
 
 .notification-list__item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 14px;
   padding: 16px 24px;
   border-bottom: 1px solid var(--color-border-light);
-  cursor: pointer;
   transition: background-color 160ms ease;
 }
 
@@ -32,6 +31,15 @@
 .notification-list__item:focus-visible {
   background: var(--color-teal-light);
   outline: none;
+}
+
+.notification-list__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
 }
 
 .notification-list__item:last-child {
@@ -64,6 +72,22 @@
 
 .notification-list__content {
   min-width: 0;
+  flex: 1;
+}
+
+.notification-list__delete {
+  border: 1px solid #d9e2f5;
+  background: #fff;
+  color: #42526c;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notification-list__delete:hover {
+  background: #f5f7fb;
 }
 
 .notification-list__title {

@@ -64,6 +64,43 @@
   color: #1f2430;
 }
 
+.nd-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nd-modal__delete-btn,
+.nd-modal__close-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nd-modal__delete-btn {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.nd-modal__close-btn {
+  background: #eef2f7;
+  color: #334155;
+}
+
+.nd-modal__delete-message {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .nd-modal__timestamp {
   margin: 0;
   font-size: 13px;

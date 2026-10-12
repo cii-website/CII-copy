@@ -5,7 +5,10 @@ import { Button } from "../../../shared";
 import NotificationTabs from "../NotificationTabs/NotificationTabs";
 import NotificationList from "../NotificationList/NotificationList";
 import NotificationDetailModal from "../NotificationDetailModal/NotificationDetailModal";
-import { fetchInstructorNotifications } from "../../../../../../api/trainer/notificationService";
+import {
+  deleteNotification,
+  fetchInstructorNotifications,
+} from "../../../../../../api/trainer/notificationService";
 import "../../../styles/variables.css";
 import "./Notifications.css";
 
@@ -29,6 +32,8 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [deleteMessage, setDeleteMessage] = useState("");
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +77,63 @@ const Notifications = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
   };
 
+  const handleDeleteNotification = async (notification) => {
+    if (!notification) return;
+
+    const notificationId =
+      notification.id ??
+      notification.user_notification_id ??
+      notification.notificationId;
+    if (!notificationId) return;
+
+    const isEventNotification =
+      String(notification.notificationType ?? "")
+        .toUpperCase()
+        .includes("EVENT") ||
+      String(notification.referenceType ?? "")
+        .toUpperCase()
+        .includes("EVENT") ||
+      String(notification.category ?? "")
+        .toLowerCase()
+        .includes("event");
+
+    if (isEventNotification) {
+      setDeleteSuccessMessage("");
+      setDeleteMessage("Event notifications cannot be deleted.");
+      setSelectedNotification(notification);
+      return;
+    }
+
+    try {
+      setDeleteMessage("");
+      setDeleteSuccessMessage("");
+      const result = await deleteNotification(notificationId);
+      setNotifications((prev) =>
+        prev.filter(
+          (item) =>
+            (item.id ?? item.user_notification_id ?? item.notificationId) !==
+            notificationId,
+        ),
+      );
+      setDeleteSuccessMessage(
+        result?.message ?? "Notification deleted successfully",
+      );
+      if (
+        selectedNotification &&
+        ((selectedNotification.id ??
+          selectedNotification.user_notification_id ??
+          selectedNotification.notificationId) === notificationId)
+      ) {
+        setSelectedNotification(null);
+      }
+    } catch (err) {
+      setDeleteMessage(
+        err?.response?.data?.message ?? "Couldn't delete this notification.",
+      );
+      setSelectedNotification(notification);
+    }
+  };
+
   return (
     <div className="staff-dashboard">
       <Topbar
@@ -99,6 +161,12 @@ const Notifications = () => {
                 </Button>
               </div>
 
+              {deleteSuccessMessage && (
+                <p className="notifications-page__delete-success" role="status">
+                  {deleteSuccessMessage}
+                </p>
+              )}
+
               <div className="notifications-page__tabs-card">
                 <NotificationTabs
                   tabs={tabsWithCounts}
@@ -117,6 +185,7 @@ const Notifications = () => {
                 <NotificationList
                   notifications={filteredNotifications}
                   onSelect={setSelectedNotification}
+                  onDelete={handleDeleteNotification}
                 />
               )}
             </div>
@@ -125,7 +194,12 @@ const Notifications = () => {
       </div>
       <NotificationDetailModal
         notification={selectedNotification}
-        onClose={() => setSelectedNotification(null)}
+        onClose={() => {
+          setSelectedNotification(null);
+          setDeleteMessage("");
+        }}
+        onDelete={handleDeleteNotification}
+        deleteMessage={deleteMessage}
       />
     </div>
   );

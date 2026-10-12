@@ -14,7 +14,12 @@ function formatDate(value) {
   });
 }
 
-export default function NotificationDetailModal({ notification, onClose }) {
+export default function NotificationDetailModal({
+  notification,
+  onClose,
+  onDelete,
+  deleteMessage,
+}) {
   if (!notification) return null;
 
   return (
@@ -52,6 +57,30 @@ export default function NotificationDetailModal({ notification, onClose }) {
         <div className="notification-detail-modal__message">
           {notification.message || notification.meta || "-"}
         </div>
+
+        <div className="notification-detail-modal__actions">
+          <button
+            type="button"
+            className="notification-detail-modal__delete-btn"
+            onClick={() => onDelete?.(notification)}
+          >
+            Delete
+          </button>
+          <button
+            type="button"
+            className="notification-detail-modal__close-btn"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+
+        {deleteMessage && (
+          <p className="notification-detail-modal__delete-message">
+            {deleteMessage}
+          </p>
+        )}
+
         <dl className="notification-detail-modal__details">
           <div>
             <dt>

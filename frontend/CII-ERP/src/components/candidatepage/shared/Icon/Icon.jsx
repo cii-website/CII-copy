@@ -12,8 +12,16 @@ const PATHS = {
   attendance:
     "M19 3h-1V1h-2v2H8V1H6v2H5C3.9 3 3 3.9 3 5v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V8h14v13zM9 10H7v2h2zm4 0h-2v2h2zm4 0h-2v2h2z",
   assessments: "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+  certificate:
+    "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
   certificates:
     "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  clipboard:
+    "M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 16H5V5h2v3h10V5h2v14z",
+  "clipboard-list":
+    "M9 1h2v2h2V1h2v2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2V1h2v2h2V1zm-4 7h10v2H5zm0 4h10v2H5zm0 4h7v2H5z",
+  "file-text":
+    "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm1 7V3.5L18.5 9H15zm-7 8h10v2H8zm0-4h10v2H8zm0-4h5v2H8z",
   jobs: "M20 6h-2.18C17.4 4.84 16.3 4 15 4h-6C7.7 4 6.6 4.84 6.18 6H4C2.9 6 2 6.9 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-9 1h2v1h-2V7zm-1-2h4c.55 0 1 .45 1 1H9c0-.55.45-1 1-1zm10 15H4V8h16v12z",
   upcomingClasses:
     "M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V8h14v12zm-7-9h5v5h-5z",
@@ -64,6 +72,8 @@ const PATHS = {
 
   hourGlass:
     "M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z",
+  hourglass:
+    "M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z",
   trophy:
     "M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z",
   lightBulb:
@@ -108,6 +118,8 @@ export default function Icon({
   color = "currentColor",
   className = "",
 }) {
+  const path = PATHS[name] || PATHS.document;
+
   return (
     <svg
       className={`icon ${className}`}
@@ -118,7 +130,7 @@ export default function Icon({
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <path d={PATHS[name] || ""} />
+      <path d={path || ""} />
     </svg>
   );
 }

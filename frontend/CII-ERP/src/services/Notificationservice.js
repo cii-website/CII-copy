@@ -19,3 +19,15 @@ export async function fetchNotifications(tabId = "All", cursor) {
   // Support both wrapped and direct responses so the UI works with either format.
   return data?.data ?? data;
 }
+
+export async function deleteNotification(userNotificationId) {
+  if (!userNotificationId) {
+    throw new Error("Notification id is required.");
+  }
+
+  const { data } = await API.delete(
+    `/user/deleteNotifs/${encodeURIComponent(userNotificationId)}`,
+  );
+
+  return data?.data ?? data;
+}

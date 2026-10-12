@@ -74,6 +74,43 @@
   color: #9aa1b1;
 }
 
+.notification-details-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.notification-details-modal__delete-btn,
+.notification-details-modal__close-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notification-details-modal__delete-btn {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.notification-details-modal__close-btn {
+  background: #eef2f7;
+  color: #334155;
+}
+
+.notification-details-modal__delete-message {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (max-width: 540px) {
   .notification-details-modal {
     padding: 24px 20px;

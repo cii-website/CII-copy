@@ -26,7 +26,7 @@ const CATEGORY_TONE = {
  * card + underlined heading (no "View all" action here, unlike
  * RecentActivity on the Work page).
  */
-export default function NotificationList({ notifications = [], onSelect }) {
+export default function NotificationList({ notifications = [], onSelect, onDelete }) {
   return (
     <SectionCard title="Recent Notifications" className="notification-list">
       <ul className="notification-list__list">
@@ -39,25 +39,43 @@ export default function NotificationList({ notifications = [], onSelect }) {
               className={`notification-list__item${
                 item.unread ? " notification-list__item--unread" : ""
               }`}
-              role="button"
-              tabIndex={0}
-              onClick={() => onSelect?.(item)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onSelect?.(item);
-                }
-              }}
             >
               <div
-                className={`notification-list__icon notification-list__icon--${tone}`}
+                className="notification-list__row"
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelect?.(item)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelect?.(item);
+                  }
+                }}
               >
-                <Icon size={18} strokeWidth={2} />
+                <div
+                  className={`notification-list__icon notification-list__icon--${tone}`}
+                >
+                  <Icon size={18} strokeWidth={2} />
+                </div>
+                <div className="notification-list__content">
+                  <p className="notification-list__title">{item.title}</p>
+                  <p className="notification-list__meta">{item.meta}</p>
+                </div>
               </div>
-              <div className="notification-list__content">
-                <p className="notification-list__title">{item.title}</p>
-                <p className="notification-list__meta">{item.meta}</p>
-              </div>
+
+              {onDelete && (
+                <button
+                  type="button"
+                  className="notification-list__delete"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete(item);
+                  }}
+                  aria-label={`Delete notification ${item.title}`}
+                >
+                  Delete
+                </button>
+              )}
             </li>
           );
         })}

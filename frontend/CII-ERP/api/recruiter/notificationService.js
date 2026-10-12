@@ -80,3 +80,15 @@ export async function fetchRecruiterNotifications(params = {}) {
     pagination: payload.pagination ?? {},
   };
 }
+
+export async function deleteNotification(userNotificationId) {
+  if (!userNotificationId) {
+    throw new Error("Notification id is required.");
+  }
+
+  const { data } = await API.delete(
+    `/user/deleteNotifs/${encodeURIComponent(userNotificationId)}`,
+  );
+
+  return data?.data ?? data;
+}

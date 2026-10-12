@@ -17,7 +17,12 @@ const TYPE_MAP = {
  *  - notification: notification object, or null when closed
  *  - onClose: () => void
  */
-export default function NotificationDetailModal({ notification, onClose }) {
+export default function NotificationDetailModal({
+  notification,
+  onClose,
+  onDelete,
+  deleteMessage,
+}) {
   const isOpen = Boolean(notification);
   const meta = notification ? TYPE_MAP[notification.type] || TYPE_MAP.system : null;
   const Icon = meta?.icon;
@@ -37,6 +42,23 @@ export default function NotificationDetailModal({ notification, onClose }) {
           <span className="nd-modal__type">{meta.label}</span>
           <h2 className="nd-modal__title">{notification.title}</h2>
           <p className="nd-modal__message">{notification.message}</p>
+          <div className="nd-modal__actions">
+            <button
+              type="button"
+              className="nd-modal__delete-btn"
+              onClick={() => onDelete?.(notification)}
+            >
+              Delete
+            </button>
+            <button
+              type="button"
+              className="nd-modal__close-btn"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
+          {deleteMessage && <p className="nd-modal__delete-message">{deleteMessage}</p>}
           <p className="nd-modal__timestamp">{notification.timestamp}</p>
         </div>
       )}

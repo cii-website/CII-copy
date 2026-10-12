@@ -6,7 +6,10 @@ import SectionHeading from "../../shared/SectionHeading/SectionHeading";
 import NotificationCard from "../../shared/NotificationCard/NotificationCard";
 import Icon from "../../shared/Icon/Icon";
 
-import { fetchNotifications } from "../../../../services/Notificationservice";
+import {
+  fetchNotifications,
+  deleteNotification,
+} from "../../../../services/Notificationservice";
 import styles from "./NotificationDashboard.module.css";
 
 import orgLogo from "../../../../assets/Logo.png";
@@ -99,6 +102,8 @@ function NotificationDashboard() {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteMessage, setDeleteMessage] = useState(null);
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState(null);
 
   const loadPage = useCallback(async (tabId, cursor, { append } = {}) => {
     setLoading(true);
@@ -214,6 +219,42 @@ function NotificationDashboard() {
     setSelectedNotification(allLoaded.find((item) => item.id === id) ?? null);
   };
 
+  const handleDeleteNotification = async (id) => {
+    const notification = allLoaded.find((item) => item.id === id);
+    if (!notification) return;
+
+    if (notification.referenceType === "EVENT") {
+      setDeleteSuccessMessage(null);
+      setDeleteMessage("Event notifications cannot be deleted.");
+      setSelectedNotification(notification);
+      return;
+    }
+
+    setDeleteMessage(null);
+    setDeleteSuccessMessage(null);
+
+    try {
+      const result = await deleteNotification(id);
+      setBuckets((prev) => ({
+        today: prev.today.filter((item) => item.id !== id),
+        yesterday: prev.yesterday.filter((item) => item.id !== id),
+        older: prev.older.filter((item) => item.id !== id),
+      }));
+      setUnreadCount((count) => Math.max(0, count - (notification.isUnread ? 1 : 0)));
+      setDeleteSuccessMessage(
+        result?.message ?? "Notification deleted successfully",
+      );
+      if (selectedNotification?.id === id) {
+        setSelectedNotification(null);
+      }
+    } catch (err) {
+      setDeleteMessage(
+        err?.response?.data?.message ?? "Couldn't delete this notification.",
+      );
+      setSelectedNotification(notification);
+    }
+  };
+
   return (
     <div className={styles.layout}>
       <Sidebar
@@ -243,6 +284,11 @@ function NotificationDashboard() {
             title="Notification"
             subtitle={`${unreadCount} Unread · Stay On Top of Deadlines, Classes, and Updates`}
           />
+          {deleteSuccessMessage && (
+            <p className={styles.deleteSuccessMessage} role="status">
+              {deleteSuccessMessage}
+            </p>
+          )}
 
           <div className={styles.filterPanel}>
             <div
@@ -298,14 +344,26 @@ function NotificationDashboard() {
                 <span className={styles.detailCategory}>
                   {selectedNotification.category}
                 </span>
-                <button
-                  type="button"
-                  className={styles.closeDetails}
-                  onClick={() => setSelectedNotification(null)}
-                >
-                  Close
-                </button>
+                <div className={styles.detailHeaderActions}>
+                  <button
+                    type="button"
+                    className={styles.deleteDetails}
+                    onClick={() => handleDeleteNotification(selectedNotification.id)}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.closeDetails}
+                    onClick={() => setSelectedNotification(null)}
+                  >
+                    Close
+                  </button>
+                </div>
                 <h2>{selectedNotification.title}</h2>
+                {deleteMessage && (
+                  <p className={styles.deleteNotice}>{deleteMessage}</p>
+                )}
                 <p>{selectedNotification.description}</p>
                 <time dateTime={selectedNotification.createdAt}>
                   {new Date(selectedNotification.createdAt).toLocaleString(
@@ -344,6 +402,7 @@ function NotificationDashboard() {
                       isUnread={notification.isUnread}
                       time={formatRelativeTime(notification.createdAt)}
                       onSelect={handleNotificationClick}
+                      onDelete={handleDeleteNotification}
                     />
                   ))}
                 </div>

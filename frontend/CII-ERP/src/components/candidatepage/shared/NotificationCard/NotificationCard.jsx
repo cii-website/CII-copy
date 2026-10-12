@@ -31,6 +31,7 @@ function NotificationCard({
   color = 'gray',
   isUnread,
   onSelect,
+  onDelete,
 }) {
   const handleKeyDown = (event) => {
     if (!onSelect) return;
@@ -38,6 +39,11 @@ function NotificationCard({
       event.preventDefault();
       onSelect(id);
     }
+  };
+
+  const handleDeleteClick = (event) => {
+    event.stopPropagation();
+    onDelete?.(id);
   };
 
   return (
@@ -64,6 +70,17 @@ function NotificationCard({
           <span className={styles.time}>{time}</span>
         </div>
       </div>
+
+      {onDelete && (
+        <button
+          type="button"
+          className={styles.deleteButton}
+          aria-label={`Delete ${title}`}
+          onClick={handleDeleteClick}
+        >
+          <Icon name="close" size={12} />
+        </button>
+      )}
     </div>
   );
 }
